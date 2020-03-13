@@ -1,0 +1,114 @@
+
+  COBDOS, SHELL PARA RUNTIME RM/COBOL-85, COPYRIGHT (C) APLISOFT A.I.S.L. 1990
+  ----------------------------------------------------------------------------
+
+        COBDOS es un m¢dulo EXE compatible con RM/COBOL-85, a trav‚s del cual
+es posible llamar a cualquier programa ejecutable y retornar de nuevo al
+programa Cobol tras terminar el anterior.
+
+        COBDOS puede ejecutar cualquier programa directamente, o bien llamar al
+procesador de comandos (Comspec actual) y ‚ste a su vez ejecutar el programa,
+o bien llamar solamente al Procesador de Comandos.
+
+        La llamada a COBDOS es muy sencilla, y se puede llamar repetidamente
+sin CANCELarlo de la memoria.
+
+        A COBDOS deben pasarse tres par metros, que son:
+
+þ Una variable donde se almacena el estado de la £ltima llamada a COBDOS.
+þ Una variable donde se almacena el Errorlevel del £ltimo programa llamado.
+þ Una cadena (inmediata o en variable) con el nombre del programa a llamar.
+
+        Opcinalmente, se puede incluir otro par metro:
+
+þ Una cadena (inmediata o en variable) con par metros a pasarle al programa.
+
+
+Sintaxis:
+          CALL "COBDOS.EXE" USING ESTADO ERRORLEVEL [**][&]NOMBRE [PARAMETROS]
+
+Ejemplo1:
+          CALL "COBDOS.EXE" USING ESTADO ERRORLEVEL "WS.COM"  "A:\CARTA.TXT"
+Ejemplo2:
+          CALL "COBDOS.EXE" USING ESTADO ERRORLEVEL "&CHKDSK"  "/F"
+Ejemplo3:
+          CALL "COBDOS.EXE" USING ESTADO ERRORLEVEL "&"
+Ejemplo4:
+          CALL "COBDOS.EXE" USING ESTADO ERRORLEVEL "*07-25*&DIR"
+
+
+PICTURES:
+            77  ESTADO      PIC 9.
+            77  ERRORLEVEL  PIC 999.
+            77  NOMBRE      PIC X(63).      (valor m ximo)
+            77  PARAMETROS  PIC X(90).      (valor m ximo)
+
+        Las dos primeras variables deben tener exactamente las PICtures
+indicadas, y las dos siguientes pueden tener un tama¤o inferior.
+
+
+ESTADO:
+       0. Todo correcto.
+       1. error en par metros para COBDOS.
+       2.
+       3. Programa/Path no encontrado.
+       4. Demasiados ficheros abiertos, o acceso denegado.
+       5. Memoria insuficiente, error en memoria, o error en entorno (SET).
+       6. Error en el proceso del DOS, no descrito.
+       7. Error, COMSPEC no encontrado para poder ejecutar COMMAND.COM (SET).
+       8.
+       9.
+
+
+Notas:
+
+þ Si el n£mero de par metros pasados es menor de 3, ocurre un error Runtime y
+  el programa entero se detiene. Es el £nico error que hace parar el programa;
+  los dem s errores s¢lo retornan su c¢digo, que el programa debe gestionar.
+
+þ El orden de los par metros y sus PICtures deben ser respetados totalmente.
+
+þ Si se especifica un nombre de programa sin el prefijo '&', ‚ste se ejecutar 
+  sin intervenci¢n del Procesador de Comandos. Al terminar el programa, es
+  devuelto el control al programa Cobol.
+
+þ El prefijo '&' en el nombre del programa, hace que se cargue el Procesador
+  de Comandos primero y, posteriormente, el programa. Tras la ejecuci¢n de
+  ‚ste, se retorna el control al programa Cobol.
+
+þ Si se especifica el prefijo '&' s¢lo, sin nombre, se ejecuta el Procesador
+  de Comandos. De ‚ste se retorna con la orden EXIT del sistema operativo.
+
+þ Para cargar el Procesador de Comandos del DOS, el m¢dulo COBDOS busca COMSPEC
+  en la cadena de entorno (que puede ver con SET), por lo que es competencia
+  del sistema espec¡fico el correcto estado de ‚sta.
+  (Los sistemas MS-DOS 2.0+ inicializan autom ticamente COMSPEC al arrancar).
+
+þ El prefijo del nombre '*Y1-Y2*', es para indicar que se cree una ventana
+  que empieze en la L¡nea Y1, y que termine en la Y2.
+  La ventana que se crea s¢lo es para los programas que escriban en pantalla
+  en modo CTTY, es decir, como una impresora.
+  En sistemas donde est‚ instalado el driver ANSI.SYS, el l¡mite inferior puede
+  no ser respetado.
+
+þ Se devuelve el ERRORLEVEL del programa que se ejecuta, teniendo en cuenta que
+  si se llama a trav‚s del Procesador de Comandos, se devuelve el ERRORLEVEL
+  del Procesador (que siempre es 0), no el del programa.
+
+þ Si se llama a trav‚s del Procesador de Comandos, se pueden ejecutar comandos
+  internos del sistema operativo, programas EXE, COM y BAT; Su ejecuci¢n ser¡a
+  la misma que si se hiciera desde la l¡nea de comandos del sistema operativo.
+
+þ Los ficheros de procesos por lotes (BAT), s¢lo se pueden ejecutar a trav‚s
+  del Procesador de Comandos.
+
+þ No se puede llamar a instalar un programa que se quede residente en memoria
+  (programa TSR), aunque s¡ se puede utilizar si ya se encuentra instalado en
+  ella.
+
+þ La memoria RAM consumida por la llamada a un programa directamente es:
+        Tama¤o del Runtime + Programa COB actual +  5 Kb aproximadamente.
+  La llamada a trav‚s del Procesador de Comandos es:
+        Tama¤o del Runtime + Programa COB actual + 10 Kb aproximadamente.
+
+
